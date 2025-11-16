@@ -7,6 +7,9 @@
 
 import SwiftUI
 
+// Reusable card summarizing a user for the search results/navigation.
+// Pure UI component with minimal presentation logic (initial letter, email username extraction).
+
 struct UserCardView: View {
     let user: User
     
@@ -36,3 +39,4 @@ struct UserCardView: View {
         .shadow(radius: 1)
     }
 }
+

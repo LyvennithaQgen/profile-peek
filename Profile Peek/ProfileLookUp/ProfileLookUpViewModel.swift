@@ -9,8 +9,13 @@ import Foundation
 import SwiftUI
 import Combine
 
+// MARK: - MVVM ViewModel for Screen 1 (Search)
+// Owns search input, loading/error state, and the found user.
+// Also prefetches posts for the found user to improve Screen 2 responsiveness.
+// Depends on UserServiceProtocol, injected for testability.
+
 @MainActor
-final class ProfileLookupViewModel: ObservableObject {
+final class ProfileLookUpViewModel: ObservableObject {
     @Published var username: String = ""{
         didSet{
             if username == ""{
@@ -39,6 +44,8 @@ final class ProfileLookupViewModel: ObservableObject {
         await fetchUser()
     }
     
+    // Orchestrates the user search flow.
+    // Resets state, calls service, animates in the found user, and prefetches posts.
     func fetchUser() async {
         errorMessage = nil
         isLoading = true
@@ -49,7 +56,7 @@ final class ProfileLookupViewModel: ObservableObject {
             withAnimation {
                 self.user = found
             }
-            // Concurrently load posts for the found user
+            // Concurrently load posts for current user
             if let uid = found.id {
                 postsTask = Task { [weak self] in
                     guard let self else { return }
@@ -59,7 +66,7 @@ final class ProfileLookupViewModel: ObservableObject {
                             self.postsCache[uid] = posts
                         }
                     } catch {
-                        
+                        // Intentionally swallowed: prefetch failure should not block navigation.
                     }
                 }
             }

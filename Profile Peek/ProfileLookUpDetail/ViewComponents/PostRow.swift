@@ -1,5 +1,5 @@
 //
-//  ProfilePeekPostView.swift
+//  PostRow.swift
 //  Profile Peek
 //
 //  Created by Lyvennitha on 15/11/25.
@@ -7,7 +7,10 @@
 
 import SwiftUI
 
-struct PostRowView: View {
+// Reusable post card used in the posts list on Screen 2.
+// Pure view component (no business logic).
+
+struct PostRow: View {
     let post: Post
     
     var body: some View {

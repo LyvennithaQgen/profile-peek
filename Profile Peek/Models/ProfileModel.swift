@@ -1,4 +1,3 @@
-
 //
 //  ProfilePeekModel.swift
 //  Profile Peek
@@ -9,6 +8,9 @@
 import Foundation
 
 // MARK: - User Model
+// Domain/Data Transfer Objects for JSONPlaceholder.
+// Codable enables decoding from API responses.
+// Identifiable supports SwiftUI Lists when needed.
 
 struct User: Codable, Identifiable {
     let id: Int?
@@ -48,3 +50,4 @@ struct Post: Codable, Identifiable {
     let title: String?
     let body: String?
 }
+

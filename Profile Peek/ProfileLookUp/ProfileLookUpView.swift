@@ -8,6 +8,12 @@
 import SwiftUI
 import SwiftData
 
+// MARK: - Screen 1 (Search) View
+// MVVM: Binds to ProfileLookUpViewModel via @StateObject.
+// Captures username input, triggers search, shows loading/error,
+// and on success presents a NavigationLink to the detail screen.
+// Prefetched posts from the VM are passed into the detail view for responsiveness.
+
 struct ProfileLookUpView: View {
     
     @StateObject private var vm = ProfileLookUpViewModel()
@@ -60,7 +66,7 @@ struct ProfileLookUpView: View {
                                             .foregroundColor(.secondary)
                                             .font(.headline)
                                             .multilineTextAlignment(.center)
-                                        //Adding retry in case of API failure Error
+                                        // Retry on API failure
                                         Button(action: { Task { await vm.search() } }) {
                                             Text(Constants.Messages.retry)
                                                 .font(.headline)
@@ -81,6 +87,8 @@ struct ProfileLookUpView: View {
                                 }
                                 
                                 if let user = vm.user {
+                                    // Navigation to Screen 2 (Details/Posts).
+                                    // Pass prefetched posts when available.
                                     NavigationLink(destination: {
                                         let initialPosts = vm.postsCache[user.id ?? -1]
                                         ProfileLookUpDetailView(user: user, initialPosts: initialPosts)
@@ -121,5 +129,4 @@ struct ProfileLookUpView: View {
 #Preview {
     ProfileLookUpView()
 }
-
 

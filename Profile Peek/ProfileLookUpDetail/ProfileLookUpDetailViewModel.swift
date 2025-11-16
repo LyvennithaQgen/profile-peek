@@ -10,6 +10,10 @@ import SwiftUI
 import Foundation
 import CoreLocation
 
+// MARK: - MVVM ViewModel for Screen 2 (Details/Posts)
+// Exposes user-derived properties for the details tab and orchestrates post loading.
+// Depends on UserServiceProtocol for data access (DI-friendly for unit tests).
+
 @MainActor
 final class ProfileLookUpDetailViewModel: ObservableObject {
     @Published private(set) var posts: [Post] = []
@@ -24,7 +28,7 @@ final class ProfileLookUpDetailViewModel: ObservableObject {
         self.service = service
     }
     
-    // New initializer that accepts optional initial posts
+    // Convenience initializer allows passing prefetched posts from Screen 1.
     convenience init(user: User, initialPosts: [Post]? = nil, service: UserServiceProtocol = UserService()) {
         self.init(user: user, service: service)
         if let initialPosts {
@@ -32,7 +36,8 @@ final class ProfileLookUpDetailViewModel: ObservableObject {
         }
     }
     
-    // Not in use: : if pull to refresh required we can use it in Future
+    // Not in use currently: If pull-to-refresh or explicit reload is added, call this.
+    // Intentionally no-op if posts are already present (avoids duplicate fetches).
     func loadPosts() async {
         if !posts.isEmpty { return }
         isLoading = true
@@ -48,6 +53,7 @@ final class ProfileLookUpDetailViewModel: ObservableObject {
 }
 
 extension ProfileLookUpDetailViewModel {
+    // Derived properties for the details tab (pure mapping from User).
     var userName: String {
         user.name ?? ""
     }
@@ -70,7 +76,6 @@ extension ProfileLookUpDetailViewModel {
         "Details for \(user.name ?? "")"
     }
     
-    // Address presentation
     var addressLine: String? {
         guard let a = user.address else { return nil }
         let parts = [a.suite, a.street, a.city, a.zipcode]
@@ -79,18 +84,15 @@ extension ProfileLookUpDetailViewModel {
         return parts.isEmpty ? nil : parts.joined(separator: ", ")
     }
     
-    // Build an Apple Maps URL for either coordinates or a postal address
+    // Best-effort Apple Maps URL using lat/lng if present, otherwise address string.
     func mapsURL() -> URL? {
-        // Prefer coordinates if available
         if let latStr = user.address?.geo?.lat,
            let lngStr = user.address?.geo?.lng,
            let lat = Double(latStr), let lng = Double(lngStr) {
-            // Apple Maps query for coordinates
             let urlString = "http://maps.apple.com/?ll=\(lat),\(lng)&q=\(urlEncoded(user.name ?? "Location"))"
             return URL(string: urlString)
         }
         
-        // Otherwise use address string
         if let address = addressLine, !address.isEmpty {
             let encoded = urlEncoded(address)
             let urlString = "http://maps.apple.com/?q=\(encoded)"
@@ -100,7 +102,7 @@ extension ProfileLookUpDetailViewModel {
         return nil
     }
     
-    // Derive an email from username and website if real email is unavailable.
+    // Derives an email address from username and website if email is absent.
     func vmUsernameToEmail() -> String? {
         let uname = username.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !uname.isEmpty else { return nil }

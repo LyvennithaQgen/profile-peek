@@ -5,11 +5,16 @@
 //  Created by Lyvennitha on 17/11/25.
 //
 
-
 import SwiftUI
 
+// MARK: - Screen 2 (Details/Posts) View
+// MVVM: Binds to ProfileLookUpDetailViewModel (not shown) via @StateObject.
+// Presents a segmented control with “User Details” and “User Posts” tabs.
+// Details tab shows actionable rows (phone, email, address->Maps, website).
+// Posts tab handles loading/error/empty states and renders a styled list.
+
 struct ProfileLookUpDetailView: View {
-    @StateObject private var vm: UserDetailViewModel
+    @StateObject private var vm: ProfileLookUpDetailViewModel
     @State private var selectedTab: Tab = .details
     @Environment(\.openURL) private var openURL
     
@@ -19,7 +24,7 @@ struct ProfileLookUpDetailView: View {
     }
     
     init(user: User, initialPosts: [Post]? = nil) {
-        _vm = StateObject(wrappedValue: UserDetailViewModel(user: user, initialPosts: initialPosts))
+        _vm = StateObject(wrappedValue: ProfileLookUpDetailViewModel(user: user, initialPosts: initialPosts))
     }
     
     var body: some View {
@@ -59,6 +64,7 @@ struct ProfileLookUpDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbarColorScheme(.dark, for: .navigationBar)
         .onAppear {
+            // Segmented control styling (UIKit appearance proxy).
             let normalAttributes: [NSAttributedString.Key: Any] = [
                 .foregroundColor: UIColor.white
             ]
@@ -260,7 +266,7 @@ struct ProfileLookUpDetailView: View {
                 }
             } else {
                 List(vm.posts) { post in
-                    PostRowView(post: post)
+                    PostRow(post: post)
                         .padding(12)
                         .listRowSeparator(.hidden) // hide separators
                         .listRowInsets(EdgeInsets()) // allow card to control its own padding
@@ -270,10 +276,10 @@ struct ProfileLookUpDetailView: View {
                 .scrollContentBackground(.hidden)
                 .background(Color.clear)
                 .listSectionSeparator(.hidden)
-                .scrollIndicators(.hidden) // remove scroll indicator
+                .scrollIndicators(.hidden)
             }
         }
-        .padding(.horizontal, 8) // reduced outer horizontal padding
+        .padding(.horizontal, 8)
     }
     
     // Helpers
@@ -285,3 +291,4 @@ struct ProfileLookUpDetailView: View {
         }
     }
 }
+
